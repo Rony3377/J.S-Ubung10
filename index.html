@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Static Template</title>
+    <style>
+      main #wkorb,
+      main .sauberOrdnen {
+        background-color: rgb(170, 119, 119);
+        padding: 10px;
+        display: grid;
+        grid-template-columns: 60% 20% 20%;
+      }
+      main #wkorb > div {
+        padding: 10px;
+        border-bottom: 1px dashed rgb(116, 33, 33);
+      }
+      main #ergeb {
+        background-color: rgb(44, 108, 133);
+        padding: 10px;
+      }
+      main .knopffeld {
+        text-align: right;
+        margin-top: 10px;
+      }
+      main .rechts {
+        text-align: right;
+      }
+      main .sauberOrdnen > div > input {
+        width: 90%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- Warenkorb-Titel -->
+      <h3>Warenkorb</h3>
+      <!-- Warenkorb-Feld -->
+      <div id="wkorb"></div>
+      <hr />
+      <!-- Ergebnis für Brutto, Netto, MwSt -->
+      <div id="ergeb" class="rechts"></div>
+      <!-- Bestellen-Knopf -->
+      <div class="knopffeld">
+        <button onClick="bestellen()">Bestellen</button>
+      </div>
+      <hr />
+      <!-- Neues Produkt in den Warenkorb hinzufügen... -->
+      <div class="sauberOrdnen">
+        <div><b>Produkt</b></div>
+        <div><b>Menge</b></div>
+        <div><b>Preis</b></div>
+        <div><input type="text" id="produkt" /></div>
+        <div><input type="number" id="menge" /></div>
+        <div><input type="text" id="preis" /></div>
+        <div
+          style="grid-column-end: span 3; text-align: right; margin-top: 10px;"
+        >
+          <button onClick="hinzufuegen()">Hinzufügen</button>
+        </div>
+      </div>
+    </main>
+    <!-- Code -->
+    <script>
+      // Verbindungsaufbau zu den HTML-Elementen */
+      const w = document.getElementById("wkorb");
+      const e = document.getElementById("ergeb");
+      const p = document.getElementById("produkt");
+      const m = document.getElementById("menge");
+      const k = document.getElementById("preis");
+      // Daten //
+      let einkaufsliste = [
+        {
+          p: "Hemd", // Produktname
+          m: 3, // Menge
+          k: 9.99 // Kosten (Preis)
+        },
+        {
+          p: "Hose",
+          m: 2,
+          k: 25.6
+        },
+        {
+          p: "Socken",
+          m: 8,
+          k: 2.5
+        },
+        {
+          p: "Cappy",
+          m: 1,
+          k: 19.0
+        }
+      ];
+      // Euro-Betrag richtig formatieren //
+      // - - - - - - - - - - - - - - - - //
+      // Eine Kommazahl wird in der Regel
+      // mit einem Punkt geschrieben. Wir
+      // möchten jedoch, das im HTML der
+      // Betrag in gewohntem Kommastil
+      // gefolgt vom € erscheint. Deshalb
+      // wird der Betrag, die ja Zahl
+      // ist, in einen Text konvertiert
+      // und dann wird der Punkt mit
+      // einem Komma vertauscht.
+      // Zudem wird geschaut, ob nach
+      // dem Komma 2 Stellen folgen.
+      // Wenn nicht, werden die #
+      // fehlenden Stellen hinzugefügt
+      // und wenn zuviel Stellen da
+      // sind, werden sie abgeschnitten. //
+      function betragFormatieren(b) {
+        // Die Zahl wird in ein Text konvertiert //
+        let text = b.toString();
+        // Variablen für ... //
+        let neu = "", // Neue Textausgabe //
+          nachKomma = 0, // Prüfen, wie viel Stellen nach dem Komma verfügbar sind //
+          beimKommaAngekommen = false; // Wurde . oder , gefunden? //
+        // Der Text wird in der Schleife //
+        // Zeichen für Zeichen durchlaufen //
+        for (n = 0; n < text.length; n++) {
+          // Wenn Komma oder Punkt gefunden wurde,
+          // werden die Stellen nach dem Komma
+          // gezählt... //
+          if (beimKommaAngekommen == true) {
+            nachKomma++;
+            // Wenn mehr als 2 Stellen
+            // nachdem Komma auftauchen,
+            // werden sie abgeschnitten...
+            if (nachKomma > 2) break;
+          }
+          // Wurde ein Punkt oder ein Komma gefunden? //
+          if (text[n] == "." || text[n] == ",") {
+            // Dann wird ein Komma notiert //
+            neu += ",";
+            // Und der Status des Komma-Fundes wird gesetzt //
+            beimKommaAngekommen = true;
+          } else neu += text[n];
+        }
+        // Wenn kein . oder , gefunden wurde,
+        // wird ein Komma mit zwei Nullen
+        // drangehangen
+        if (nachKomma == 0) {
+          neu += ",00";
+          // Wenn nur ein Ziffer nach dem
+          // Komma gefunden wurde, wird noch
+          // ein Null dahinter gehangen
+        } else if (nachKomma == 1) {
+          neu += "0";
+        }
+        // Dann wird noch der Euro-Zeichen
+        // dahinter gehangen
+        neu += " &euro;";
+        // und das Ganze wird zurückgegeben //
+        return neu;
+      }
+      // Diese Funktion schreibt die Daten in dien Warenkorb //
+      function warenkorbLaden(x) {
+        let sam = `<div><b>Produkt</b></div>
+                  <div><b>Menge</b></div>
+                  <div><b>Preis</b></div>`;
+        // *** //
+        for (let n = 0; n < x.length; n++)
+          sam += `<div>${x[n].p}</div>
+                  <div class = "rechts">${x[n].m}</div>
+                  <div class = "rechts">${betragFormatieren(x[n].k)}</div>`;
+        // *** //
+        w.innerHTML += sam;
+      }
+      // Gesamtpreis ausrechnen //
+      function gesamtPreisBerechnen(y) {
+        // Variablen für Werte //
+        let brutto = 0,
+          netto = 0,
+          mwst = 0;
+        // Jeder Eintrag hat eine Menge (m) und einen Preis (k).
+        // Die Menge und der Preis werden Mal genommen und das
+        // Ergebnis wird in die Variable "brutto" hinzuaddiert.
+        for (let n = 0; n < y.length; n++) brutto += y[n].m * y[n].k;
+        // Und der Bruttobetrag wird ausgegeben //
+        e.innerHTML += `Brutto: ${betragFormatieren(brutto)}<br>`;
+        // Der Nettobetrag wird ausgerechnet //
+        netto = brutto / 1.19;
+        // Aus dem Differenz zwischen Brutto und Netto wird MwSt ermittelt //
+        mwst = brutto - netto;
+        // Der Nettobetrag wird ausgegeben //
+        e.innerHTML += `Netto: ${betragFormatieren(netto)}<br>`;
+        // Der Steuerbetrag wird ausgegeben //
+        e.innerHTML += `MwSt: ${betragFormatieren(mwst)}<br>`;
+      }
+      // Neuen Eintrag in den Warenkorb hinzufügen //
+      function hinzufuegen() {
+        // Die Menge wird als ZAHL notiert //
+        let total = parseFloat(m.value);
+        // Wenn die Menge weniger als 1 ist ... //
+        if (total < 1) alert("Mindestmenge 1 Stück!");
+        // Wenn die Menge übrer 50 ist ... //
+        else if (total > 50)
+          alert("Wir haben nicht mehr als 50 Stück im Lager!");
+        // Andernfalls gilt ... //
+        else {
+          // Die neuen Werte werden in den Warenkorb hinzugefügt //
+          w.innerHTML += `<div>${p.value}</div>
+                  <div class = "rechts">${m.value}</div>
+                  <div class = "rechts">${betragFormatieren(k.value)}</div>`;
+          // Das Ergebnis wird leer gemacht //
+          e.innerHTML = "";
+          // Der neue Produkt wird in die Einkaufsliste hinzugefügt //
+          einkaufsliste.push({
+            p: p.value,
+            m: parseFloat(m.value),
+            k: parseFloat(k.value)
+          });
+          // Die Eingabefelder werden leer gemacht //
+          p.value = "";
+          m.value = "";
+          k.value = "";
+          // Die Berechnung und Ausgabe des Ergebnisses werden aktualisiert //
+          gesamtPreisBerechnen(einkaufsliste);
+        }
+      }
+      // Bestellung aufgeben //
+      function bestellen() {
+        // Information für den Anwender //
+        alert("Vielen Dank für Ihren Einkauf");
+        // Warenkorb wird leer gemacht //
+        w.innerHTML = "";
+        // Ergebnis wird leer gemacht //
+        e.innerHTML = "";
+        // Array "einkaufsliste" wird leer gemacht //
+        einkaufsliste = [];
+      }
+      // Den Warenkorb laden //
+      warenkorbLaden(einkaufsliste);
+      // Ergebnis ausrechnen und ausgeben //
+      gesamtPreisBerechnen(einkaufsliste);
+    </script>
+  </body>
+</html>
